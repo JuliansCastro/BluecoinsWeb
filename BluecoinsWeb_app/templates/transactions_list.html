@@ -1,0 +1,602 @@
+<!-- templates/transactions_list.html -->
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bluecoins Transactions</title>
+    <link
+      rel="icon"
+      href="/static/images/cropped-favico-192x192.png"
+      type="image/png"
+    />
+  </head>
+
+  <body>
+    <header>
+      <a href="{% url 'home' %}">
+        <img
+          src="/static/images/cropped-favico-192x192.png"
+          alt="Logo"
+          class="logo"
+        />
+      </a>
+      Bluecoins Transactions
+    </header>
+
+    <!-- Uncomment the following line to enable the new transaction button -->
+    <!--
+    <a href="{% url 'transaction_create' %}" class="new-transaction-btn">+</a>
+    -->
+    
+    <!-- Label filter button container -->
+    <div id="label-filter-container">
+      <button id="label-filter-btn">
+        <span title="Filter by label">🏷️</span>
+      </button>      <div
+        id="label-dropdown"
+        style="
+          display: none;
+          position: absolute;
+          right: 70px;
+          top: 30px;
+          background: #fff;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          min-width: 180px;
+          max-height: 250px;
+          overflow-y: auto;
+        "
+      >
+        <div style="padding: 8px; font-weight: bold">Filter by label</div>
+        <div
+          style="padding: 8px; cursor: pointer"
+          data-label=""
+          class="{% if not selected_label %}selected-label{% endif %}"
+        >
+          All
+        </div>        {% for label in all_labels %}
+        <div
+          style="padding: 8px; cursor: pointer"
+          data-label="{{ label }}"
+          class="{% if label == selected_label %}selected-label{% endif %}"
+        >
+          {{ label }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Reports by label button container -->
+    <div id="report-filter-container">      <button id="report-filter-btn">
+        <!-- Uncomment the following line to use an icon instead of text -->
+        <span title="Download report by label">📄</span>
+        <!--
+        <span title="Reports by label">⬇️</span>
+        -->
+      </button><div id="report-dropdown">
+        <div style="padding: 8px; font-weight: bold">Reports by label</div>
+        <div
+          style="padding: 8px; cursor: pointer"
+          data-report-label=""
+        >
+          All transactions
+        </div>
+        {% for label in all_labels %}
+        <div
+          style="padding: 8px; cursor: pointer"
+          data-report-label="{{ label }}"
+        >
+          {{ label }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="container" id="transactions-container">
+      {% load humanize %} {% include 'transactions_partial.html' %}
+    </div>    <div id="loading" style="text-align: center; display: none">
+      Loading more transactions...
+    </div>
+
+  </body>
+</html>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #fdf8fa;
+    margin: 0;
+    padding: 0;
+  }
+
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    background-color: white;
+    padding: 1rem;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+
+  .logo {
+    height: 40px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+    margin-top: 90px; /* espacio para el header fijo */
+  }
+
+  .new-transaction-btn {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background-color: #8a4df8;
+    color: white;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    z-index: 300;
+  }
+
+  /* Button for exporting report by label */
+  .report-btn {
+    position: fixed;
+    top: 260px;
+    right: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.15);
+    z-index: 300;
+  }  #label-filter-container,
+  #report-filter-container {
+    position: fixed;
+    right: 20px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  #label-filter-container {
+    top: 190px;
+  }
+
+  #report-filter-container {
+    top: 260px;
+  }
+
+  #label-filter-btn,
+  #report-filter-btn {
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.15);
+  }
+
+  #label-filter-btn {
+    background-color: #8a4df8;
+  }
+
+  #report-filter-btn {
+    background-color: #4CAF50;
+  }
+
+  #label-dropdown,
+  #report-dropdown {
+    display: none;
+    position: absolute;
+    right: 70px;
+    top: 30px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-width: 180px;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  #label-dropdown div,
+  #report-dropdown div {
+    padding: 8px;
+    cursor: pointer;
+  }
+
+  #label-dropdown div:hover,
+  #report-dropdown div:hover {
+    background: #f0f0f0;
+  }
+
+  #label-dropdown .selected {
+    background: #007bff;
+    color: white;
+  }
+
+  /* Highlight of selected label */
+  .selected-label {
+    color: #007bff !important;
+    font-weight: bold;
+    background: #f0f8ff;
+  }
+
+  .date-header {
+    background-color: #f1f1f1;
+    padding: 0.5rem;
+    font-weight: bold;
+    color: #555;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  .transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 0.8rem;
+    margin-bottom: 0.8rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+
+  .transaction-item:hover {
+    background-color: #f9f9f9;
+  }
+
+  .transaction-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ff7070;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1.2rem;
+    margin-right: 1rem;
+  }
+
+  .transaction-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .transaction-name {
+    font-weight: bold;
+  }
+
+  .transaction-category {
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+  }
+
+  .label-item {
+    background-color: #007bff;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+
+  .transaction-amount {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #e60000;
+  }
+
+  .transaction-amount.positive {
+    color: #009900;
+  }
+</style>
+
+<script>
+  // Use an IIFE to encapsulate the code and not pollute the global scope.
+  (function () {
+    // --- 1. Centralized Configuration and State ---
+    const CONFIG = {
+      // WE NO LONGER NEED BASE_URL, which makes the script more robust.
+      TRANSACTION_LIMIT: 1000,
+      DEBOUNCE_DELAY: 200,
+      SCROLL_THRESHOLD: 150,
+    };
+
+    const state = {
+      page: 2,
+      loading: false,
+      isTabActive: true,
+      hasMorePages: true,
+      selectedLabel: "{{ selected_label|escapejs }}", // Initialize from template
+      transactionCache: [],
+    };    const DOM = {
+      container: document.getElementById("transactions-container"),
+      loadingIndicator: document.getElementById("loading"),
+      labelFilterBtn: document.getElementById("label-filter-btn"),
+      labelDropdown: document.getElementById("label-dropdown"),
+      reportFilterBtn: document.getElementById("report-filter-btn"),
+      reportDropdown: document.getElementById("report-dropdown"),
+    };
+
+    // --- 2. Refactored Main Logic ---
+
+    /**
+     * Single function to fetch transactions.
+     * Now uses the current window URL instead of a hardcoded URL.
+     * @param {number} pageNumber - The page number to request.
+     * @returns {Promise<object|null>}
+     */
+    async function fetchTransactions(pageNumber) {
+      // We create the URL from the current page address.
+      let url = new URL(window.location.href);
+
+      // We add or update the page and label parameters.
+      url.searchParams.set("page", pageNumber);
+      if (state.selectedLabel) {
+        url.searchParams.set("label", state.selectedLabel);
+      } else {
+        url.searchParams.delete("label"); // Clean if there is no label.
+      }
+
+      try {
+        const response = await fetch(url, {
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+        });
+        if (!response.ok) {
+          // Error 404 will be caught here.
+          throw new Error(`Error in server response: ${response.statusText}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Error loading transactions:", error);
+        updateLoadingState(true, "Error loading transactions.");
+        return null;
+      }
+    }
+
+    /**
+     * Processes and renders the transactions in the DOM.
+     * @param {object} data - Data received from fetch.
+     * @param {boolean} append - True to add, false to replace.
+     */
+    function renderTransactions(data, append = false) {
+      if (
+        !data ||
+        !data.transactions_html ||
+        data.transactions_html.trim() === ""
+      ) {
+        if (!append) {
+          DOM.container.innerHTML = "";
+          updateLoadingState(true, "No transactions found.");
+        }
+        state.hasMorePages = false;
+        return;
+      }
+
+      if (append) {
+        DOM.container.insertAdjacentHTML("beforeend", data.transactions_html);
+      } else {
+        DOM.container.innerHTML = data.transactions_html;
+      }
+
+      state.hasMorePages = data.has_more;
+
+      if (!state.hasMorePages) {
+        // Only show the "No more" message if we are scrolling (append is true).
+        // If it is an initial load (filter), the "No transactions found" message
+        // is already in the main HTML and is enough.
+        if (append) {
+          updateLoadingState(true, "There are no more transactions.");
+        } else {
+          // If it is a filter load and there are no more pages, just
+          // make sure the "Loading..." spinner is hidden.
+          updateLoadingState(false);
+        }
+      } else {
+        updateLoadingState(false);
+      }
+    }
+
+    function updateLoadingState(
+      isLoading,
+      message = "Loading more transactions..."
+    ) {
+      if (isLoading) {
+        DOM.loadingIndicator.textContent = message;
+        DOM.loadingIndicator.style.display = "block";
+      } else {
+        DOM.loadingIndicator.style.display = "none";
+      }
+      state.loading = isLoading;
+    }
+
+    async function loadMoreTransactions() {
+      if (state.loading || !state.hasMorePages || !state.isTabActive) return;
+
+      updateLoadingState(true);
+      const data = await fetchTransactions(state.page);
+
+      if (data) {
+        renderTransactions(data, true);
+        state.page++;
+      }
+    }
+
+    // Function to apply the selected label filter.
+    // This function is called when the user selects a label from the dropdown.
+    async function applyFilter() {
+      state.page = 1;
+      state.hasMorePages = true;
+      updateLoadingState(true, "Applying filter...");
+
+      const data = await fetchTransactions(state.page);
+
+      if (data) {
+        renderTransactions(data, false);
+        state.page++; // Prepare for the next load (page 2)
+      }
+
+      // Update the URL in the browser bar to reflect the filter.
+      let browserUrl = new URL(window.location.href);
+      if (state.selectedLabel) {
+        browserUrl.searchParams.set("label", state.selectedLabel);
+      } else {
+        browserUrl.searchParams.delete("label");
+      }
+      browserUrl.searchParams.delete("page"); // We don't want 'page' in the visible URL.
+      history.pushState({}, "", browserUrl);
+    }
+
+    // --- 3. Event Handlers ---
+
+    function debounce(func, delay) {
+      let timeout;
+      return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+
+    const handleScroll = debounce(() => {
+      const nearBottom =
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - CONFIG.SCROLL_THRESHOLD;
+      if (nearBottom) {
+        loadMoreTransactions();
+      }
+    }, CONFIG.DEBOUNCE_DELAY);
+
+    function handleVisibilityChange() {
+      state.isTabActive = !document.hidden;
+    }
+
+    function setupEventListeners() {
+      window.addEventListener("scroll", handleScroll);
+      document.addEventListener("visibilitychange", handleVisibilityChange);      if (DOM.labelFilterBtn && DOM.labelDropdown) {
+        DOM.labelFilterBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          // Close the report dropdown if it's open
+          DOM.reportDropdown.style.display = "none";
+          // Toggle the label dropdown
+          DOM.labelDropdown.style.display =
+            DOM.labelDropdown.style.display === "block" ? "none" : "block";
+        });document.addEventListener("click", () => {
+          DOM.labelDropdown.style.display = "none";
+          DOM.reportDropdown.style.display = "none";
+        });
+
+        DOM.labelDropdown.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const target = e.target.closest("div[data-label]");
+          if (target && target.dataset.label !== undefined) {
+            DOM.labelDropdown
+              .querySelectorAll("div[data-label]")
+              .forEach((el) => el.classList.remove("selected-label"));
+            target.classList.add("selected-label");
+
+            state.selectedLabel = target.dataset.label;
+            DOM.labelDropdown.style.display = "none";
+            applyFilter();          }
+        });
+      }      // Report filter functionality
+      if (DOM.reportFilterBtn && DOM.reportDropdown) {
+        DOM.reportFilterBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          // Close the label dropdown if it's open
+          DOM.labelDropdown.style.display = "none";
+          // Toggle the report dropdown
+          DOM.reportDropdown.style.display =
+            DOM.reportDropdown.style.display === "block" ? "none" : "block";
+        });DOM.reportDropdown.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const target = e.target.closest("div[data-report-label]");
+          if (target && target.dataset.reportLabel !== undefined) {
+            const selectedLabel = target.dataset.reportLabel;
+            
+            // First, open the report in a new tab (this will download immediately)
+            if (selectedLabel) {
+              const reportUrl = `{% url 'report_by_label' %}?label=${encodeURIComponent(selectedLabel)}`;
+              window.open(reportUrl, '_blank');
+              
+              // Then navigate to show the filtered transactions
+              setTimeout(() => {
+                const transactionsUrl = `{% url 'transactions_list' %}?label=${encodeURIComponent(selectedLabel)}`;
+                window.location.href = transactionsUrl;
+              }, 100);
+            } else {
+              const reportUrl = `{% url 'report_by_label' %}`;
+              window.open(reportUrl, '_blank');
+              
+              // Then navigate to transactions without filter
+              setTimeout(() => {
+                window.location.href = `{% url 'transactions_list' %}`;
+              }, 100);
+            }
+          }
+        });
+      }
+    }
+
+    // --- 4. Initialization ---
+    document.addEventListener("DOMContentLoaded", () => {
+      setupEventListeners();
+      // Initial load if the page does not have enough content to scroll
+      setTimeout(() => {
+        if (
+          DOM.container.clientHeight < window.innerHeight &&
+          state.hasMorePages &&
+          !state.loading
+        ) {
+          loadMoreTransactions();
+        }
+      }, 500);
+    });
+  })();
+</script>

@@ -1,0 +1,15 @@
+<!-- templates/transaction_confirm_delete.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Eliminar Transacción</title>
+</head>
+<body>
+    <h1>¿Realmente deseas eliminar esta transacción?</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Eliminar</button>
+    </form>
+    <a href="{% url 'transactions_list' %}">Cancelar</a>
+</body>
+</html>

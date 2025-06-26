@@ -1,0 +1,199 @@
+<!-- transaction_detail.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction Details</title>
+    <link rel="icon" href="/static/images/cropped-favico-192x192.png" type="image/png">
+</head>
+<body>
+    <header>
+        <img src="/static/images/cropped-favico-192x192.png" alt="Logo" class="logo">
+        Bluecoins Transaction
+    </header>
+
+    <div class="container">
+        {% load humanize %}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <button class="back-button" onclick="window.history.back()">&larr; Back</button>
+            {% if transaction.pk %}
+                <!-- Uncomment the following line to enable the edit button -->
+                <!--
+                <a class="edit-button" href="{% url 'transaction_update' transaction.pk %}">Editar &rarr; </a>
+                -->
+                {% endif %}
+        </div>
+        <div class="header">
+            <span>{{ transaction.item_id }}</span>
+            <span class="date-time">{{ transaction.date|date:"d \d\e F \d\e Y" }}  {{ transaction.date|time:"g:i a" }}</span>
+        </div>
+        
+        <div class="amount-box {% if transaction.amount < 0 %}negative{% else %}positive{% endif %}">
+            {{ transaction.transaction_currency|default:"COP" }} ${{ formatted_amount|floatformat:2|intcomma }}
+        </div>
+        
+        <div class="info">
+            <div><strong>Transaction type:</strong> {{ transaction.transaction_type_id }}</div>
+            <div><strong>Category:</strong> {{ transaction.category_id }}</div>
+            <div><strong>Account:</strong> {{ transaction.account_id }}</div>
+            <div><strong>Notes:</strong> {{ transaction.notes|default:"No notes" }}</div>
+
+            <div class="labels">
+                <strong>Labels:</strong>
+                {% for label in labels %}
+                    <span class="label-item">{{ label.label_name }}</span>
+                {% empty %}
+                    <p>No labels.</p>
+                {% endfor %}
+            </div>
+        </div>        <div class="bottom-actions">
+            {% if is_expense %}
+                <button class="button expense">EXPENSES</button>
+            {% endif %}
+
+            {% if is_transfer %}
+                <button class="button transfer">TRANSFERS</button>
+            {% endif %}
+
+            {% if is_income %}
+                <button class="button income">INCOME</button>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #fdf8fa;
+        padding: 20px;
+    }
+
+    header {
+        /* Box Model y Layout (dimensions, positioning, flexbox/grid) */
+        display: flex;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        align-items: center;
+        justify-content: center;
+
+        /* Visual (colors, shadows, borders, backgrounds) */
+        background: #fff; /* Or background-color, if it's just color */
+        background-color: white; /* This line is redundant if you use background: #fff; */
+        border-radius: 10px;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+
+        /* Typography */
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .back-button {
+        display: inline-block;
+        padding: 1px 2px;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+    .edit-button {
+        display: ;
+        padding: 1px 2px;
+        background-color:rgb(58, 42, 179);
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+    .logo {
+        height: 40px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+    .date-time {
+        font-size: 18px;
+        font-weight: normal;
+        color: #777;
+        margin-left: 30px;
+    }
+    .amount-box {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        background: #f1f1f1;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 15px 0;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    .amount-box.negative {
+        color: #e60000;
+    }
+    .amount-box.positive {
+        color: #009900;
+    }
+    .info {
+        text-align: left;
+        font-size: 18px;
+        margin-top: 15px;
+    }
+    .info div {
+        margin-bottom: 10px;
+    }
+    .labels {
+        margin-top: 10px;
+    }
+    .label-item {
+        background-color: #007bff;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        display: inline-block;
+        margin: 5px 5px 0 0;
+        font-size: 24px;
+    }
+    .bottom-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+    .button {
+        padding: 10px 20px;
+        font-size: 18px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    .button.expense {
+        background-color: #e60000;
+        color: white;
+        margin-right: auto;
+    }
+    .button.transfer {
+        background-color: #8a4df8;
+        color: white;
+        margin: 0 auto;
+    }
+    .button.income {
+        background-color: #009900;
+        color: white;
+        margin-left: auto;
+    }
+</style>

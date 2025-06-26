@@ -1,0 +1,36 @@
+<!-- {% load humanize %}  Make sure to add this line at the beginning -->
+{% load humanize %}
+
+{% for date, tx_list in transactions_by_date.items %}
+    <div class="date-header">{{ date }}</div>
+    {% if tx_list %}
+        {% for tx in tx_list %}
+            <div class="transaction-item" onclick="window.location.href='{% url 'transaction_detail' tx.pk %}'">
+                <div class="transaction-left">
+                    <div class="icon">💰</div>
+                    <div class="transaction-details">
+                        <div class="transaction-name">{{ tx.item_id }}</div>
+                        <div class="transaction-category">{{ tx.category_id }}</div>
+                        {% if tx.labels and tx.labels|length > 0 %}
+                            <div class="labels">
+                                {% for label in tx.labels %}
+                                    <span class="label-item">{{ label.label_name }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="transaction-amount {% if tx.amount and tx.amount > 0 %}positive{% endif %}">
+                    ${{ tx.formatted_amount|default:0|floatformat:2|intcomma }}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-transactions">No hay transacciones para esta fecha.</div>
+    {% endif %}
+
+<hr class="date-separator" style="margin: 10px 0; border: 10; border-top: 3px solid #ccc;">
+
+{% empty %}
+    <div class="no-transactions" style="text-align: center;">No transactions found.</div>
+{% endfor %}

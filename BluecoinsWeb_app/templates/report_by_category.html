@@ -1,0 +1,161 @@
+<!-- templates/transactions_list.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Transacciones</title>
+  <style>
+    /* Fondo pastel */
+    body {
+      margin: 0; 
+      padding: 0;
+      font-family: sans-serif;
+      background-color: #fdf8fa; /* tonalidad rosada claro */
+    }
+
+    header {
+      background-color: #ffffff;
+      padding: 1rem;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* Encabezado de fecha */
+    .date-header {
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: #555;
+      background-color: #f1f1f1;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      display: inline-block;
+    }
+
+    /* Cada item de transacción */
+    .transaction-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background-color: #fff;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .transaction-left {
+      display: flex;
+      align-items: center;
+    }
+    .icon-container {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background-color: #f08080; /* color de icono */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 0.8rem;
+      color: #fff;
+      font-weight: bold;
+    }
+    .transaction-details {
+      display: flex;
+      flex-direction: column;
+    }
+    .transaction-category {
+      font-weight: bold;
+      font-size: 1rem;
+      margin: 0;
+    }
+    .transaction-subinfo {
+      margin: 0.2rem 0 0.4rem 0;
+      color: #777;
+      font-size: 0.9rem;
+    }
+    .transaction-label {
+      display: inline-block;
+      margin-top: 0.3rem;
+      padding: 0.2rem 0.5rem;
+      background-color: #eaeaea;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      color: #333;
+    }
+
+    /* Cantidad a la derecha */
+    .transaction-amount {
+      color: #e60000; 
+      font-weight: bold; 
+      font-size: 1.1rem; 
+      margin-left: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Transacciones</h1>
+  </header>
+
+  <div class="container">
+    <!--
+      Suponiendo que tu vista agrupa transacciones por fecha y envía un 
+      diccionario/estructura tipo: 
+      {
+        '2025-01-27': [tx1, tx2],
+        '2025-01-24': [tx3],
+        ...
+      }
+    -->
+    {% for date, tx_list in categories_data. %}
+      <div class="date-header">
+        <!-- Muestra la fecha en formato personalizado si gustas -->
+        {{ date|date:"D. d de F de Y" }}
+      </div>
+
+      {% for tx in tx_list %}
+        <div class="transaction-item">
+          <div class="transaction-left">
+            <!-- Icono circular -->
+            <div class="icon-container">
+              <!-- si tienes icono, podrías mostrarlo como imagen. Ej:
+                   <img src="{{ tx.categoryicon }}" width="24" height="24" alt=""> 
+                   o una letra como fallback
+              -->
+              <span>Icon</span>
+            </div>
+            <div class="transaction-details">
+              <p class="transaction-category">
+                <!-- Nombre de la categoría o descripción principal -->
+                {{ tx.itemname|default:"Sin descripción" }}
+              </p>
+              <p class="transaction-subinfo">
+                <!-- Subcategoría, cuenta, payee, etc. -->
+                {{ tx.categoryname }}<br>
+                {{ tx.accountname }} 
+                <!-- Podrías mostrar un saldo, etc. -->
+              </p>
+              <!-- Etiqueta / label si existe -->
+              {% if tx.label %}
+                <span class="transaction-label">{{ tx.label }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <!-- Monto a la derecha -->
+          <div class="transaction-amount">
+            -${{ tx.amount }}
+          </div>
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+</body>
+</html>

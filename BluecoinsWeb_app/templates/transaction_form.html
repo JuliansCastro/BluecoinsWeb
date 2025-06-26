@@ -1,0 +1,122 @@
+<!-- templates/transaction_form.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Add transaction</title>
+    <link rel="icon" href="/static/images/cropped-favico-192x192.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fdf8fa;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        .logo {
+            height: 40px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .form-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        form p {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-top: 3px;
+        }
+        button[type="submit"] {
+            background-color: #8a4df8;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            transition: background 0.2s;
+        }
+        button[type="submit"]:hover {
+            background-color: #6c2ed9;
+        }
+        .cancel-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-left: 10px;
+            transition: background 0.2s;
+        }
+        .cancel-link:hover {
+            background-color: #495057;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="/static/images/cropped-favico-192x192.png" alt="Logo" class="logo">
+        Bluecoins Transaction
+    </header>
+    <div class="container">
+        <div class="form-title">Añadir</div>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="form-actions">
+                <button type="submit">Guardar</button>
+                <a href="{% url 'transactions_list' %}" class="cancel-link">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

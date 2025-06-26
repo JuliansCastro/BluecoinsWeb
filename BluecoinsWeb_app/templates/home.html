@@ -1,0 +1,85 @@
+<!-- templates/home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bluecoins Home</title>
+    <link rel="icon" href="/static/images/cropped-favico-192x192.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fdf8fa;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: white;
+            padding: 1rem;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo {
+            height: 40px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto 0 auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .main-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+        .paragraph {
+            font-size: 1rem;
+            color: #777;
+            margin-top: 1.5rem;
+        }
+        .main-btn {
+            display: inline-block;
+            background-color: #8a4df8;
+            color: white;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.15);
+            margin-top: 1.5rem;
+            transition: background 0.2s;
+        }
+        .main-btn:hover {
+            background-color: #6c2ed9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="/static/images/cropped-favico-192x192.png" alt="Logo" class="logo">
+        Bluecoins Home
+    </header>
+    <div class="container">
+        <div class="main-title">Welcome to Bluecoins Web</div>
+        <div class="subtitle">Manage your transactions and reports easily and visually.<br>Use the menu to navigate through the different sections.</div>
+        <a href="{% url 'transactions_list' %}" class="main-btn">Go to Transactions</a>
+        <div class="paragraph">(Still under development.)</div>
+    </div>
+</body>
+</html>
