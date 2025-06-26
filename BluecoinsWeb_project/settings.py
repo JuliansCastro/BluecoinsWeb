@@ -29,10 +29,10 @@ def find_bluecoins_database():
     Returns the path to the database file that starts with 'bluecoins' and ends with '.fydb'
     """
     # Directory where bluecoins databases are stored (For example, Google Drive for PC)
-    bluecoins_dir = r'C:/Users/JuliansCastro/Mi unidad/Bluecoins/QuickSync/'
+    #bluecoins_dir = r'C:/Users/JuliansCastro/Mi unidad/Bluecoins/QuickSync/'
     
     # If the above path doesn't exist, fallback to local database
-    #bluecoins_dir = BASE_DIR / 'databases/'
+    bluecoins_dir = BASE_DIR / 'databases/'
     
     # Pattern to match bluecoins*.fydb files
     pattern = os.path.join(bluecoins_dir, 'bluecoins*.fydb')
