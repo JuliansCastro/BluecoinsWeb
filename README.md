@@ -42,7 +42,7 @@ openpyxl>=3.0.0  # For Excel report generation
 
 ```bash
 git clone https://github.com/JuliansCastro/BluecoinsWeb.git
-cd bluecoinsWeb_project
+cd BluecoinsWeb
 ```
 
 ### 2. Create Virtual Environment (Recommended)
@@ -73,7 +73,7 @@ pip install Django==5.1.5 openpyxl
 
 #### Configure Bluecoins Database Path
 
-Edit `bluecoinsWeb_project/settings.py` and update the `find_bluecoins_database()` function to point to your Bluecoins backup directory:
+Edit `BluecoinsWeb_project/settings.py` and update the `find_bluecoins_database()` function to point to your Bluecoins backup directory:
 
 ```python
 def find_bluecoins_database():
@@ -157,16 +157,16 @@ Displays spending analysis grouped by transaction categories.
 ## Project Structure
 
 ```text
-bluecoinsWeb_project/
+BluecoinsWeb_project/
 ├── manage.py                     # Django management script
 ├── README.md                     # Project documentation
-├── bluecoinsWeb_project/         # Main project configuration
+├── BluecoinsWeb_project/         # Main project configuration
 │   ├── __init__.py
 │   ├── settings.py               # Django settings with dual database setup
 │   ├── urls.py                   # URL routing configuration
 │   ├── wsgi.py                   # WSGI configuration
 │   └── asgi.py                   # ASGI configuration
-├── bluecoins_app/                # Main application
+├── BluecoinsWeb_app/                # Main application
 │   ├── __init__.py
 │   ├── models.py                 # Database models (auto-generated from Bluecoins schema)
 │   ├── views.py                  # View controllers and business logic
