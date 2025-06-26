@@ -29,6 +29,7 @@ Bluecoins Web Project is a financial data visualization and reporting tool that 
 ```txt
 Django==5.1.5
 openpyxl>=3.0.0  # For Excel report generation
+python-dotenv>=0.19.0
 ```
 
 ### External Requirements
@@ -66,7 +67,7 @@ pip install -r requirements.txt
 or
 
 ```bash
-pip install Django==5.1.5 openpyxl
+pip install Django==5.1.5 openpyxl python-dotenv>=0.19.0
 ```
 
 ### 4. Database Configuration
