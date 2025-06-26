@@ -40,14 +40,26 @@ python-dotenv>=0.19.0
 - Bluecoins mobile app backup files (.fydb format)
 - Access to the backup file location (local or cloud storage)
 
-## Installation
+## Installation on Local Machine
 
-### 1. Clone or Download the Project
+### 1. Download the Project with PowerShell and extract the files:
 
-```bash
-git clone https://github.com/JuliansCastro/BluecoinsWeb.git
+```powershell
+Start-Process "https://github.com/JuliansCastro/BluecoinsWeb/raw/refs/heads/main/docs/BluecoinsWeb_local_config.zip"
+```
+
+```powershell
+Expand-Archive -Path "BluecoinsWeb_local_config.zip" -DestinationPath "BluecoinsWeb"
+```
+
+```powershell
+Remove-Item "BluecoinsWeb_local_config.zip"
+```
+
+```powershell
 cd BluecoinsWeb
 ```
+
 
 ### 2. Create Virtual Environment (Recommended)
 
