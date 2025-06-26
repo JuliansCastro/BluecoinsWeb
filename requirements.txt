@@ -1,3 +1,14 @@
 Django==5.1.5
 openpyxl>=3.0.0
 python-dotenv>=0.19.0
+
+# Production dependencies
+gunicorn>=21.2.0
+whitenoise>=6.5.0
+
+# AWS dependencies
+boto3>=1.26.0
+django-storages>=1.13.0
+
+# Database dependencies (uncomment if using PostgreSQL with RDS)
+# psycopg2-binary>=2.9.0

@@ -1,0 +1,16 @@
+[Unit]
+Description=Bluecoins Web Django Application
+After=network.target
+
+[Service]
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/opt/bluecoins-web
+Environment="PATH=/opt/bluecoins-web/venv/bin"
+EnvironmentFile=/opt/bluecoins-web/.env
+ExecStart=/opt/bluecoins-web/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 BluecoinsWeb_project.wsgi:application
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

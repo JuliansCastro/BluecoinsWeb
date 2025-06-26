@@ -31,3 +31,25 @@ Thumbs.db
 # Project specific
 #databases/*.fydb
 #!databases/.gitkeep
+
+# Deployment specific
+staticfiles/
+collected_static/
+logs/*.log
+backups/
+*.pem
+*.key
+
+# AWS
+.aws/
+
+# SSL certificates
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Backup files
+*.backup
+*.sql
+*.dump

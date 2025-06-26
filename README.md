@@ -1,10 +1,13 @@
 # Bluecoins Web - Django
 
-A Django-based web application for viewing and analyzing financial transactions from [Bluecoins](https://www.bluecoinsapp.com/) mobile app backup files.
+A Django-based web application for viewing and analyzing financial transactions from [Bluecoins](https://www.bluecoinsapp.com/) mobile app backup files. Deployed with a dual-database architecture to separate Django admin and Bluecoins data, providing a responsive and user-friendly interface for financial data visualization.
 
 ## Project Overview
 
-Bluecoins Web Project is a financial data visualization and reporting tool that connects to Bluecoins backup database files (.fydb format) and provides a web interface for viewing transactions, generating reports, and analyzing financial data. The application automatically detects and connects to the most recent Bluecoins backup file, making it seamless to work with updated financial data.
+Bluecoins Web Project is a financial data visualization and reporting tool that connects to Bluecoins backup database files (.fydb format) and provides a web interface for viewing transactions, generating reports, and analyzing financial data. The application automatically detects and connects to the most recent Bluecoins backup file, making it seamless to work with updated financial data. This project is built using Django, leveraging its powerful ORM capabilities to handle financial data efficiently, and this project is deploy on aws ec2 instance.
+
+If you want to run on local, you can extract separately the zip file _**`docs/BluecoinsWeb_local_config.zip`**_ and following the instructions in this README.md file. Else, you can deploy on AWS EC2 instance using the instructions in the`deploy/README_DEPLOYMENT.md` file.
+
 
 ### Key Features
 
