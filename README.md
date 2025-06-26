@@ -195,6 +195,35 @@ BluecoinsWeb_project/
     └── bluecoins.fydb            # Bluecoins backup file (example)
 ```
 
+## App Diagram
+
+```mermaid
+graph TD
+
+    448["User<br>External Actor"]
+    449["Local Databases<br>SQLite / FYDB"]
+    subgraph 441["Django Web Application<br>Django/Python"]
+        442["Project Configuration<br>Django Settings/URLConf"]
+        443["Request Handlers (Views)<br>Django/Python"]
+        444["Data Models (ORM)<br>Django/Python"]
+        445["Database Router<br>Python"]
+        446["UI Templates<br>HTML/Django"]
+        447["Django CLI<br>Python Script"]
+        %% Edges at this level (grouped by source)
+        447["Django CLI<br>Python Script"] -->|uses config from| 442["Project Configuration<br>Django Settings/URLConf"]
+        447["Django CLI<br>Python Script"] -->|manages| 444["Data Models (ORM)<br>Django/Python"]
+        442["Project Configuration<br>Django Settings/URLConf"] -->|routes to| 443["Request Handlers (Views)<br>Django/Python"]
+        443["Request Handlers (Views)<br>Django/Python"] -->|uses| 444["Data Models (ORM)<br>Django/Python"]
+        443["Request Handlers (Views)<br>Django/Python"] -->|renders| 446["UI Templates<br>HTML/Django"]
+        444["Data Models (ORM)<br>Django/Python"] -->|queries routed by| 445["Database Router<br>Python"]
+    end
+    %% Edges at this level (grouped by source)
+    448["User<br>External Actor"] -->|sends HTTP request| 442["Project Configuration<br>Django Settings/URLConf"]
+    444["Data Models (ORM)<br>Django/Python"] -->|persisted in| 449["Local Databases<br>SQLite / FYDB"]
+    445["Database Router<br>Python"] -->|selects| 449["Local Databases<br>SQLite / FYDB"]
+
+```
+
 ## Testing
 
 ### Running Tests
