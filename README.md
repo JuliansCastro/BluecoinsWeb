@@ -398,6 +398,15 @@ Copy the generated key and update the `DJANGO_SECRET_KEY` in your `.env` file.
 - Configure proper `ALLOWED_HOSTS` for your domain
 - Ensure `.env` is listed in `.gitignore`
 
+#### 5. Only for test this app (No secure)
+
+Login in the admin Django interface (For example, http://127.0.0.1:8000/admin/) with the following credentials:
+
+```plaintext
+Username: admin
+Password: {oMYREY848i4
+```
+
 ### Dependencies for Production
 
 Install the additional dependencies required for environment variable management:
