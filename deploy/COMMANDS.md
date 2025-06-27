@@ -114,7 +114,7 @@ sudo apt-get install python3 python3-pip python3-venv git nginx -y
 # 4. Create application directory
 ```bash
 sudo mkdir -p /opt/bluecoins-web
-sudo chown ec2-user:ec2-user /opt/bluecoins-web
+sudo chown admin:admin /opt/bluecoins-web
 ```
 
 # 5. Clone repository
@@ -315,7 +315,7 @@ tar -czf staticfiles_backup_$(date +%Y%m%d_%H%M%S).tar.gz staticfiles/
 
 # 3. Complete application directory backup
 ```bash
-sudo tar -czf /home/ec2-user/bluecoins_backup_$(date +%Y%m%d_%H%M%S).tar.gz /opt/bluecoins-web --exclude='venv' --exclude='*.pyc' --exclude='__pycache__'
+sudo tar -czf /home/admin/bluecoins_backup_$(date +%Y%m%d_%H%M%S).tar.gz /opt/bluecoins-web --exclude='venv' --exclude='*.pyc' --exclude='__pycache__'
 ```
 
 # 4. Restore database backup
@@ -372,7 +372,7 @@ python manage.py check --deploy
 # 3. Check file permissions
 ```bash
 ls -la /opt/bluecoins-web/
-sudo chown -R ec2-user:ec2-user /opt/bluecoins-web/
+sudo chown -R admin:admin /opt/bluecoins-web/
 ```
 # 4. Test gunicorn manually
 ```bash

@@ -7,7 +7,7 @@ echo "🚀 Starting BluecoinsWeb update..."
 
 # Variables
 APP_DIR="/opt/bluecoins-web"
-BACKUP_DIR="/home/ec2-user/backups"
+BACKUP_DIR="/home/admin/backups"  # Changed to 'admin' for Debian AMI
 DATE=$(date +%Y%m%d_%H%M%S)
 
 # Create backups directory if it doesn't exist

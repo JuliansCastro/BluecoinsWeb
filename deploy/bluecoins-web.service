@@ -3,8 +3,12 @@ Description=Bluecoins Web Django Application
 After=network.target
 
 [Service]
-User=ec2-user
-Group=ec2-user
+# Default user for Amazon Linux 2 is 'ec2-user'
+# For Ubuntu AMI, change to 'ubuntu'
+# For Debian AMI, use 'admin'
+# For CentOS AMI, use 'centos'
+User=admin
+Group=admin
 WorkingDirectory=/opt/bluecoins-web
 Environment="PATH=/opt/bluecoins-web/venv/bin"
 EnvironmentFile=/opt/bluecoins-web/.env
