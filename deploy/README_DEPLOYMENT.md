@@ -50,7 +50,7 @@ This guide will take you step by step to deploy your Django application on AWS u
 
 2. **Save credentials:** Save the Access Key ID and Secret Access Key that are displayed.
 
-### Step 2: Launch EC2 Instance
+### Step 2: Launch EC2 Instance with Debian/Ubuntu linux Distribution
 
 1. **Go to AWS EC2 console**
 2. **Launch new instance:**
@@ -61,30 +61,46 @@ This guide will take you step by step to deploy your Django application on AWS u
      - HTTP (80) from anywhere
      - HTTPS (443) from anywhere (optional)
 
-3. **Create/select Key Pair** for SSH access
+3. **Create/select Key Pair** for SSH access and download the `.pem` file.
 
 ### Step 3: Connect to EC2 Instance
 
 ```bash
 # Connect via SSH (replace with your .pem file and public IP)
-ssh -i "your-keypair.pem" ec2-user@your-ec2-public-ip
+ssh -i "your-keypair.pem" admin@your-ec2-public-ip
 ```
 
 ### Step 4: Configure the Server
 
-1. **Upload your code to the server:**
+1. **Update and upgrade the system:**
    ```bash
-   # Option 1: Via Git (recommended)
-   sudo yum install git -y
-   git clone https://github.com/your-username/BluecoinsWeb.git /opt/bluecoins-web
-   
+   sudo apt-get update && sudo apt-get upgrade -y
+   ```
+
+2. **Configure the server:**
+   ```bash
+    # Install vital dependencies
+    sudo apt-get install python3 python3-pip python3-venv nginx git -y
+
+   # Create application directory - one directory for each application
+    sudo mkdir -p /opt/environments/bluecoins-web
+    sudo chown admin:admin /opt/environments/bluecoins-web
+    ls -l /opt/environments/bluecoins-web
+    ```
+
+3. **Upload your code to the server:**
+   ```bash
+
+   # Option 1: Via Git (very recommended)
+   git clone https://github.com/JuliansCastro/BluecoinsWeb.git /opt/environments/bluecoins-web
+
    # Option 2: Via SCP from your local machine
-   scp -i "your-keypair.pem" -r . ec2-user@your-public-ip:/opt/bluecoins-web
+   scp -i "your-keypair.pem" -r . ec2-user@your-public-ip:/opt/environments/bluecoins-web
    ```
 
 2. **Run deployment script:**
    ```bash
-   cd /opt/bluecoins-web
+   cd /opt/environments/bluecoins-web
    chmod +x deploy/deploy_ec2.sh
    sudo ./deploy/deploy_ec2.sh
    ```

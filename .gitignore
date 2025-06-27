@@ -53,3 +53,6 @@ backups/
 *.backup
 *.sql
 *.dump
+
+# Migrations
+migrations/

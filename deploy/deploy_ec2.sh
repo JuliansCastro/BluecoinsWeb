@@ -4,20 +4,18 @@
 echo "Starting Django deployment on EC2..."
 
 # Update system packages
-sudo yum update -y
+#sudo apt-get update && sudo apt-get upgrade -y
 
-# Install Python 3 and pip
-sudo yum install python3 python3-pip git -y
+# Install Python 3, nginx and vital dependencies
+# sudo apt-get install python3 python3-pip python3-venv nginx git -y
 
-# Install and configure nginx
-sudo yum install nginx -y
 
 # Create application directory
-sudo mkdir -p /opt/bluecoins-web
-sudo chown ec2-user:ec2-user /opt/bluecoins-web
+#sudo mkdir -p /opt/environments/bluecoins-web
+#sudo chown admin:admin /opt/environments/bluecoins-web
 
 # Navigate to application directory
-cd /opt/bluecoins-web
+# cd deploy/
 
 # Clone repository (replace with your repository URL)
 # git clone https://github.com/yourusername/BluecoinsWeb.git .
@@ -43,6 +41,8 @@ sed -i "s/your-super-secret-key-here/$SECRET_KEY/" .env
 python manage.py collectstatic --noinput
 
 # Run migrations
+echo "Running migrations..."
+python manage.py makemigrations
 python manage.py migrate
 
 # Create superuser (interactive)
