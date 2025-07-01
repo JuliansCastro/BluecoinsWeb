@@ -80,6 +80,7 @@ This guide will take you step by step to deploy your Django application on AWS u
      - SSH (22) from your IP
      - HTTP (80) from anywhere
      - HTTPS (443) from anywhere (optional)
+     - Custom TCP (8000) from anywhere (optional, for development)
 
 3. **Create/select and download Key Pair** for SSH access and download the `.pem` file.
 
