@@ -3,6 +3,11 @@
 
 set -e  # Exit on any error
 
+echo ""
+echo "---------------------------------------------"
+echo "Executing update.sh - script for BluecoinsWeb"
+echo "---------------------------------------------"
+echo ""
 echo "🚀 Starting BluecoinsWeb update..."
 
 # Variables
@@ -11,7 +16,10 @@ BACKUP_DIR="/home/admin/backups"  # Changed to 'admin' for Debian AMI
 DATE=$(date +%Y%m%d_%H%M%S)
 
 # Create backups directory if it doesn't exist
-mkdir -p $BACKUP_DIR
+if [ ! -d "$BACKUP_DIR" ]; then
+    sudo mkdir -p $BACKUP_DIR
+    sudo chown admin:admin $BACKUP_DIR  # Ensure 'admin' user owns the backup directory
+fi
 
 echo "📦 Creating backup before updating..."
 
