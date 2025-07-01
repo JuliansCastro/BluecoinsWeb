@@ -211,26 +211,6 @@ echo "-----------------------------------------"
 echo "Step 17: Running database migrations..."
 python manage.py migrate
 
-# Fix database permissions (important for SQLite)
-echo
-echo "-----------------------------------------"
-echo "Step 17.1: Fixing database permissions..."
-DB_PATH=$(python manage.py shell -c "from django.conf import settings; print(settings.DATABASES['default']['NAME'])" 2>/dev/null)
-if [ -f "$DB_PATH" ]; then
-    echo "Setting correct permissions for database: $DB_PATH"
-    sudo chown $USER_NAME:$USER_NAME "$DB_PATH"
-    sudo chmod 664 "$DB_PATH"
-    
-    # Also fix directory permissions
-    DB_DIR=$(dirname "$DB_PATH")
-    sudo chown $USER_NAME:$USER_NAME "$DB_DIR"
-    sudo chmod 755 "$DB_DIR"
-    
-    echo "Database permissions fixed"
-else
-    echo "Database file not found, permissions will be set during first run"
-fi
-
 # Create superuser (interactive)
 echo
 echo "-----------------------------------------"

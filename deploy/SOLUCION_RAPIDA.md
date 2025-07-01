@@ -1,11 +1,7 @@
-# 🚨 Solución Rápida para Error 500 en Django Admin
+# 🚨 Solución Rápida para Error 400 Bad Request
 
 ## Problema Identificado
-El error 500 después del login en Django admin es causado por un problema de permisos en la base de datos SQLite. El error específico es:
-
-**`sqlite3.OperationalError: attempt to write a readonly database`**
-
-Django necesita escribir en la base de datos para crear sesiones cuando un usuario hace login, pero el archivo de base de datos no tiene permisos de escritura.
+El script de deployment funcionó correctamente y nginx se configuró bien, pero ahora Django está devolviendo un error 400 "Bad Request". Esto sucede porque la IP pública de tu servidor no está incluida en `DJANGO_ALLOWED_HOSTS`.
 
 ## ✅ Solución Inmediata (Ejecutar en tu servidor)
 
@@ -15,38 +11,37 @@ Django necesita escribir en la base de datos para crear sesiones cuando un usuar
 cd /opt/bluecoins-web
 
 # Hacer ejecutable el script de reparación
-chmod +x deploy/fix_database_permissions.sh
+chmod +x deploy/fix_nginx.sh
 
-# Ejecutar la reparación de permisos
-./deploy/fix_database_permissions.sh
+# Ejecutar la reparación (ahora incluye fix de ALLOWED_HOSTS)
+./deploy/fix_nginx.sh
 ```
 
 ### Opción 2: Reparación Manual
 ```bash
-# Navegar al directorio del proyecto
+# Obtener la IP pública real
+PUBLIC_IP=$(curl -s https://ipinfo.io/ip)
+echo "Tu IP pública es: $PUBLIC_IP"
+
+# 1. Reparar ALLOWED_HOSTS en Django
 cd /opt/bluecoins-web
+sed -i "s/DJANGO_ALLOWED_HOSTS=.*/DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,$PUBLIC_IP/" .env
 
-# 1. Identificar la ruta de la base de datos
-DB_PATH=$(python manage.py shell -c "from django.conf import settings; print(settings.DATABASES['default']['NAME'])")
-echo "Base de datos: $DB_PATH"
+# 2. Reparar la configuración de nginx
+sudo sed -i "s/server_name.*/server_name $PUBLIC_IP;/" /etc/nginx/conf.d/bluecoins-web.conf
 
-# 2. Corregir permisos del archivo de base de datos
-sudo chown admin:admin "$DB_PATH"
-sudo chmod 664 "$DB_PATH"
+# 3. Verificar configuraciones
+sudo nginx -t
+echo "ALLOWED_HOSTS configurado:"
+grep DJANGO_ALLOWED_HOSTS .env
 
-# 3. Corregir permisos del directorio
-sudo chown admin:admin "$(dirname "$DB_PATH")"
-sudo chmod 755 "$(dirname "$DB_PATH")"
-
-# 4. Corregir permisos de todo el proyecto
-sudo chown -R admin:admin /opt/bluecoins-web
-
-# 5. Ejecutar migraciones por si acaso
-source venv/bin/activate
-python manage.py migrate
-
-# 6. Reiniciar Django
+# 4. Reiniciar servicios
+sudo systemctl restart nginx
 sudo systemctl restart bluecoins-web
+
+# 5. Verificar que ambos servicios estén funcionando
+sudo systemctl status nginx
+sudo systemctl status bluecoins-web
 ```
 
 ## 🧪 Verificar que todo funcione

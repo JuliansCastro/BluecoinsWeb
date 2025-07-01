@@ -52,37 +52,3 @@ echo "----------------------------------------"
 echo "📋 Verificando permisos:"
 ls -la logs/
 whoami
-
-echo ""
-echo "----------------------------------------"
-echo "📋 Verificando permisos de base de datos:"
-
-# Obtener ruta de la base de datos
-DB_PATH=$(python manage.py shell -c "
-from django.conf import settings
-db_config = settings.DATABASES['default']
-if db_config['ENGINE'] == 'django.db.backends.sqlite3':
-    print(db_config['NAME'])
-" 2>/dev/null)
-
-echo "Archivo de base de datos: $DB_PATH"
-if [ -f "$DB_PATH" ]; then
-    ls -la "$DB_PATH"
-    echo "Directorio de base de datos:"
-    ls -la "$(dirname "$DB_PATH")"
-    
-    # Verificar si se puede escribir
-    if [ -w "$DB_PATH" ]; then
-        echo "✅ Base de datos tiene permisos de escritura"
-    else
-        echo "❌ Base de datos NO tiene permisos de escritura"
-    fi
-    
-    if [ -w "$(dirname "$DB_PATH")" ]; then
-        echo "✅ Directorio tiene permisos de escritura"
-    else
-        echo "❌ Directorio NO tiene permisos de escritura"
-    fi
-else
-    echo "❌ Archivo de base de datos no encontrado"
-fi
