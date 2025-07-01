@@ -81,7 +81,7 @@ This guide will take you step by step to deploy your Django application on AWS u
      - HTTP (80) from anywhere
      - HTTPS (443) from anywhere (optional)
 
-3. **Create/select Key Pair** for SSH access and download the `.pem` file.
+3. **Create/select and download Key Pair** for SSH access and download the `.pem` file.
 
 ### Step 3: Connect to EC2 Instance
 
@@ -96,11 +96,55 @@ ssh -i "your-keypair.pem" admin@your-ec2-public-ip
    ```bash
    sudo apt-get update && sudo apt-get upgrade -y
    ```
+2. **Upload `deploy_universal.sh` file using [_FileZilla_](https://filezilla-project.org/download.php):**
 
-2. **Configure the server:**
+<!--
+https://stackoverflow.com/questions/16744863/connect-to-amazon-ec2-file-directory-using-filezilla-and-sftp
+-->
+
+#### _FileZilla Setup_:
+Used a video tutorial for this. Just check:
+
+[Connect to Amazon EC2 file directory using FileZilla and SFTP, Video Tutorial](http://y2u.be/e9BDvg42-JI)
+
+Summary of above video tutorial:
+
+1. Edit (Preferences) > Settings > Connection > SFTP, Click "Add key file”
+2. Browse to the location of your .pem file and select it. 
+3. A message box will appear asking your permission to convert the file into ppk format. Click Yes, then give the file a name and store it somewhere.
+4. If the new file is shown in the list of Keyfiles, then continue to the next step. If not, then click "Add keyfile..." and select the converted file.
+5. File > Site Manager Add a new site with the following parameters:
+
+   - **Host**: Your public DNS name of your EC2 instance, or the public IP address of the server.
+
+   - **Protocol**: SFTP
+
+   - **Logon Type**: Normal
+
+   - **User**: From the docs: "For Amazon Linux, the default user name is `ec2-user`. For RHEL5, the user name is often `root` but might be `ec2-user`. For Ubuntu, the user name is `ubuntu`. For SUSE Linux, the user name is `root`. For Debian, the user name is `admin`. Otherwise, check with your AMI provider."
+
+      Press Connect Button - If saving of passwords has been disabled, you will be prompted that the logon type will be changed to 'Ask for password'. Say 'OK' and when connecting, at the password prompt push 'OK' without entering a password to proceed past the dialog.
+
+**Note**: FileZilla automatically figures out which key to use. You do not need to specify the key after importing it as described above.
+
+#### _Manual `deploy_universal.sh` File Upload_:
+
+1. Upload file in `home/admin` directory of your EC2 instance using FileZilla or SCP.
+
+2. **Execute the deployment script:**
+
+   ```bash
+   admin@your-public-ip: cd /home/admin
+   chmod +x deploy_universal.sh
+   sudo ./deploy_universal.sh
+   ```
+
+3. **Configure the server (manual):**
+
+Only if you didn't use the `deploy_universal.sh` script, follow these steps:
    ```bash
     # Install vital dependencies
-    sudo apt-get install python3 python3-pip python3-venv nginx git -y
+    sudo apt-get install python3 git -y
 
    # Create application directory
    sudo mkdir -p /opt/bluecoins-web

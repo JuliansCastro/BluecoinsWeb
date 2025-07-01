@@ -30,7 +30,7 @@ echo "Installing Python 3, pip, git, and nginx..."
 if [ "$PACKAGE_MANAGER" = "apt" ]; then
     eval "$INSTALL_CMD python3 python3-pip python3-venv git nginx"
 else
-    eval "$INSTALL_CMD python3 python3-pip git nginx"
+    eval "$INSTALL_CMD python3 python3-pip python3-venv git nginx"
 fi
 
 # Create application directory
@@ -42,7 +42,7 @@ sudo chown $USER_NAME:$USER_NAME /opt/bluecoins-web
 cd /opt/bluecoins-web
 
 # Clone repository (replace with your repository URL)
-# git clone https://github.com/yourusername/BluecoinsWeb.git .
+git clone https://github.com/JuliansCastro/BluecoinsWeb.git
 
 # Create virtual environment
 echo "Creating virtual environment..."
