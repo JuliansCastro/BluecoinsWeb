@@ -178,6 +178,14 @@ echo "Step 13: Generating Django secret key..."
 SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
 sed -i "s/your-super-secret-key-here/$SECRET_KEY/" .env
 
+# Configure ALLOWED_HOSTS with detected IP
+echo
+echo "-----------------------------------------"
+echo "Step 13.1: Configuring ALLOWED_HOSTS..."
+# Get the same IP we'll use for nginx (we'll set this later in the script)
+# For now, create a placeholder that we'll update when we detect the IP
+echo "Will update ALLOWED_HOSTS later with detected public IP..."
+
 # Update the service file with the correct user
 echo
 echo "-----------------------------------------"
@@ -283,6 +291,18 @@ fi
 
 echo "Final detected public IP: $PUBLIC_IP"
 
+# Update ALLOWED_HOSTS in .env with the detected public IP
+echo "Updating ALLOWED_HOSTS with detected IP: $PUBLIC_IP"
+if [ "$PUBLIC_IP" = "localhost" ]; then
+    # For localhost deployment
+    sed -i "s/DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1/DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1/" .env
+    echo "ALLOWED_HOSTS configured for localhost"
+else
+    # For public IP deployment
+    sed -i "s/DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1/DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,$PUBLIC_IP/" .env
+    echo "ALLOWED_HOSTS configured with public IP: $PUBLIC_IP"
+fi
+
 # Copy nginx configuration
 sudo cp deploy/nginx.conf /etc/nginx/conf.d/bluecoins-web.conf
 
@@ -330,6 +350,11 @@ if sudo nginx -t; then
     sudo systemctl restart nginx
     if sudo systemctl is-active --quiet nginx; then
         echo "Nginx started successfully!"
+        
+        # Restart Django service to reload ALLOWED_HOSTS configuration
+        echo "Restarting Django service to apply ALLOWED_HOSTS changes..."
+        sudo systemctl restart bluecoins-web
+        sleep 2
         
         # Final verification - test the full stack
         echo

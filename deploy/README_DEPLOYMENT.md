@@ -369,7 +369,22 @@ python manage.py loaddata backup_file.json
      - Port 80 already in use: `sudo netstat -tlnp | grep :80`
    - Fix configuration and test: `sudo nginx -t && sudo systemctl restart nginx`
 
-4. **Database connection error:**
+4. **400 Bad Request Error:**
+   - This means Django is rejecting requests from your public IP
+   - **Cause**: Your server's public IP is not in Django's `ALLOWED_HOSTS`
+   - **Quick fix**:
+     ```bash
+     # Get your public IP
+     PUBLIC_IP=$(curl -s https://ipinfo.io/ip)
+     # Update ALLOWED_HOSTS
+     cd /opt/bluecoins-web
+     sed -i "s/DJANGO_ALLOWED_HOSTS=.*/DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,$PUBLIC_IP/" .env
+     # Restart Django
+     sudo systemctl restart bluecoins-web
+     ```
+   - **Automated fix**: Use the repair script: `cd /opt/bluecoins-web && ./deploy/fix_nginx.sh`
+
+5. **Database connection error:**
    - Check SQLite file permissions
    - Review configuration in settings.py
 

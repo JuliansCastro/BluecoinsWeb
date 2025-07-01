@@ -1,7 +1,7 @@
-# 🚨 Solución Rápida para Problema de Nginx
+# 🚨 Solución Rápida para Error 400 Bad Request
 
 ## Problema Identificado
-El script de deployment funcionó correctamente, pero nginx falló debido a un problema en la configuración del `server_name` cuando no se pudo detectar la IP pública automáticamente.
+El script de deployment funcionó correctamente y nginx se configuró bien, pero ahora Django está devolviendo un error 400 "Bad Request". Esto sucede porque la IP pública de tu servidor no está incluida en `DJANGO_ALLOWED_HOSTS`.
 
 ## ✅ Solución Inmediata (Ejecutar en tu servidor)
 
@@ -13,7 +13,7 @@ cd /opt/bluecoins-web
 # Hacer ejecutable el script de reparación
 chmod +x deploy/fix_nginx.sh
 
-# Ejecutar la reparación
+# Ejecutar la reparación (ahora incluye fix de ALLOWED_HOSTS)
 ./deploy/fix_nginx.sh
 ```
 
@@ -23,17 +23,25 @@ chmod +x deploy/fix_nginx.sh
 PUBLIC_IP=$(curl -s https://ipinfo.io/ip)
 echo "Tu IP pública es: $PUBLIC_IP"
 
-# Reparar la configuración de nginx
+# 1. Reparar ALLOWED_HOSTS en Django
+cd /opt/bluecoins-web
+sed -i "s/DJANGO_ALLOWED_HOSTS=.*/DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,$PUBLIC_IP/" .env
+
+# 2. Reparar la configuración de nginx
 sudo sed -i "s/server_name.*/server_name $PUBLIC_IP;/" /etc/nginx/conf.d/bluecoins-web.conf
 
-# Verificar que la configuración sea válida
+# 3. Verificar configuraciones
 sudo nginx -t
+echo "ALLOWED_HOSTS configurado:"
+grep DJANGO_ALLOWED_HOSTS .env
 
-# Si es válida, reiniciar nginx
+# 4. Reiniciar servicios
 sudo systemctl restart nginx
+sudo systemctl restart bluecoins-web
 
-# Verificar que nginx esté corriendo
+# 5. Verificar que ambos servicios estén funcionando
 sudo systemctl status nginx
+sudo systemctl status bluecoins-web
 ```
 
 ## 🧪 Verificar que todo funcione
