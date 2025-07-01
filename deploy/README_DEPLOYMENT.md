@@ -9,6 +9,23 @@ This guide will take you step by step to deploy your Django application on AWS u
 - Git installed
 - Basic knowledge of Linux/SSH
 
+**Important:** This guide is optimized for **Debian 12 AMI** with user `admin`. See the AMI configuration section below for other options.
+
+## 🔧 AMI Selection and Configuration
+
+**Choose your AMI type based on your preference:**
+
+| AMI Type | Default User | SSH Connection | Package Manager | Status |
+|----------|-------------|----------------|-----------------|---------|
+| **Debian 12** ⭐ | `admin` | `ssh -i key.pem admin@ip` | `apt` | **Recommended** |
+| Amazon Linux 2 | `ec2-user` | `ssh -i key.pem ec2-user@ip` | `yum` | Well supported |
+| Ubuntu 22.04 LTS | `ubuntu` | `ssh -i key.pem ubuntu@ip` | `apt` | Popular choice |
+| CentOS | `centos` | `ssh -i key.pem centos@ip` | `yum` | Enterprise |
+
+**Note:** If you choose a different AMI, either:
+- Manual update: Modify user references in configuration files
+- Automatic: Use `deploy/deploy_universal.sh` which auto-detects your system
+
 ## 🏗️ Deployment Architecture
 
 ```
@@ -85,41 +102,40 @@ ssh -i "your-keypair.pem" admin@your-ec2-public-ip
     # Install vital dependencies
     sudo apt-get install python3 python3-pip python3-venv nginx git -y
 
-   # Create application directory - one directory for each application
-    sudo mkdir -p /opt/environments/bluecoins-web
-    sudo chown admin:admin /opt/environments/bluecoins-web
-    ls -lah /opt/environments/bluecoins-web
+   # Create application directory
+   sudo mkdir -p /opt/bluecoins-web
+   sudo chown admin:admin /opt/bluecoins-web
+   ls -lah /opt/bluecoins-web
     ```
 
 3. **Upload your code to the server:**
    ```bash
 
    # Option 1: Via Git (very recommended)
-   git clone https://github.com/JuliansCastro/BluecoinsWeb.git /opt/environments/bluecoins-web
+   git clone https://github.com/JuliansCastro/BluecoinsWeb.git /opt/bluecoins-web
 
    # Option 2: Via SCP from your local machine
-   scp -i "your-keypair.pem" -r . admin@your-public-ip:/opt/environments/bluecoins-web
+   scp -i "your-keypair.pem" -r . admin@your-public-ip:/opt/bluecoins-web
    ```
 
 2. **Run deployment script:**
    ```bash
-   cd /opt/environments/bluecoins-web
-   chmod +x deploy/deploy_ec2.sh
-   sudo ./deploy/deploy_ec2.sh
+   cd /opt/bluecoins-web
+   chmod +x deploy/deploy_universal.sh
+   sudo ./deploy/deploy_universal.sh
    ```
 
 ### Step 5: Configure Environment Variables
 
 1. **Edit .env file:**
    ```bash
-   cd /opt/environments/bluecoins-web
-   sudo nano .env
+   cd /opt/bluecoins-web
+   nano .env
    ```
 
    ```bash
-   # En another terminal, generate a secret key
-    python -c "import secrets; print(secrets.token_urlsafe(50))"
-   
+   # In another terminal, generate a secret key
+   python -c "import secrets; print(secrets.token_urlsafe(50))"
    ```
 
 2. **Configure the following variables:**
@@ -182,7 +198,11 @@ ssh -i "your-keypair.pem" admin@your-ec2-public-ip
 
 1. **Install Certbot:**
    ```bash
-   sudo yum install certbot python3-certbot-nginx -y
+   # For Debian/Ubuntu
+   sudo apt-get install certbot python3-certbot-nginx -y
+   
+   # For Amazon Linux (if using yum)
+   # sudo yum install certbot python3-certbot-nginx -y
    ```
 
 2. **Obtain SSL certificate:**
@@ -190,23 +210,17 @@ ssh -i "your-keypair.pem" admin@your-ec2-public-ip
    sudo certbot --nginx -d your-domain.com
    ```
 
-## 🔧 Important: AMI-Specific Configuration
+## 🚀 Quick Start Summary for Debian
 
-**Default users vary by AMI type:**
+If you're using **Debian 12 AMI**, here's the condensed workflow:
 
-| AMI Type | Default User | SSH Connection | Package Manager |
-|----------|-------------|----------------|-----------------|
-| **Debian 12** | `admin` | `ssh -i key.pem admin@ip` | `apt` |
-| Amazon Linux 2 | `ec2-user` | `ssh -i key.pem ec2-user@ip` | `yum` |
-| Ubuntu 22.04 LTS | `ubuntu` | `ssh -i key.pem ubuntu@ip` | `apt` |
-| CentOS | `centos` | `ssh -i key.pem centos@ip` | `yum` |
-
-**This guide is configured for Debian AMI** with user `admin`. If you choose a different AMI, you'll need to update:
-- User in `deploy/bluecoins-web.service`
-- Commands in documentation
-- Package manager commands (yum vs apt)
-
-Alternatively, use `deploy/deploy_universal.sh` which auto-detects your system.
+1. **Launch EC2 instance** with Debian 12 AMI
+2. **Connect:** `ssh -i "your-keypair.pem" admin@your-ec2-public-ip`
+3. **Clone repo:** `git clone https://github.com/JuliansCastro/BluecoinsWeb.git /opt/bluecoins-web`
+4. **Auto-deploy:** `cd /opt/bluecoins-web && chmod +x deploy/deploy_universal.sh && sudo ./deploy/deploy_universal.sh`
+5. **Configure .env** with your settings
+6. **Setup services:** Follow steps 6-7 from the detailed guide above
+7. **Done!** Your Django app is live 🎉
 
 ## 🔧 Useful Maintenance Commands
 
@@ -280,14 +294,4 @@ python manage.py loaddata backup_file.json
    - Verify AWS credentials
    - Review bucket policies
 
-## 🎯 Next Steps
 
-1. **Configure custom domain**
-2. **Implement CDN with CloudFront**
-3. **Configure monitoring with CloudWatch**
-4. **Implement CI/CD with GitHub Actions**
-5. **Migrate to RDS PostgreSQL** for better scalability
-
----
-
-**Congratulations! 🎉 Your Django application is now running on AWS.**

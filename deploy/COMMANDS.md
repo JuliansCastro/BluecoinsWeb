@@ -58,9 +58,22 @@ Your Django application has been prepared for deployment on AWS with the followi
 
 # Useful commands for BluecoinsWeb deployment on AWS
 
----
-# LOCAL COMMANDS (Before deployment)
+# =============================================================================
+# SYSTEM DETECTION
+# =============================================================================
 
+# Check current user
+whoami
+
+# Check OS distribution  
+cat /etc/os-release
+
+# Check available package manager
+which apt-get || which yum
+
+# =============================================================================
+# LOCAL COMMANDS (Before deployment)
+# =============================================================================
 
 # 1. Generate new SECRET_KEY
 python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
@@ -119,7 +132,7 @@ sudo chown admin:admin /opt/bluecoins-web
 
 # 5. Clone repository
 ```bash
-git clone https://github.com/your-username/BluecoinsWeb.git /opt/bluecoins-web
+git clone https://github.com/JuliansCastro/BluecoinsWeb.git /opt/bluecoins-web
 ```
 
 # 6. Create virtual environment
