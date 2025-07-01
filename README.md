@@ -53,6 +53,11 @@ python-dotenv>=0.19.0
 - Bluecoins mobile app backup files (.fydb format)
 - Access to the backup file location (local or cloud storage)
 
+## Installation on AWS EC2 Instance
+
+Go to documentation for deployment on AWS EC2 instance:
+ >[deploy/README_DEPLOYMENT.md](https://github.com/JuliansCastro/BluecoinsWeb/blob/main/deploy/README_DEPLOYMENT.md)
+
 ## Installation on Local Machine
 
 ### 1. Download the Project with PowerShell and extract the files:
