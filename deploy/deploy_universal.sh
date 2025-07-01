@@ -266,24 +266,58 @@ echo "Step 20: Configuring Nginx..."
 # This works on EC2 instances and is safer than hardcoding IPs
 # If running locally, it will default to "localhost"
 PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo "localhost")
-echo "Detected public IP: $PUBLIC_IP"
+
+# If PUBLIC_IP is empty or failed, try alternative methods
+if [ -z "$PUBLIC_IP" ] || [ "$PUBLIC_IP" = "" ]; then
+    echo "Primary IP detection failed, trying alternative methods..."
+    # Try to get public IP via external service
+    PUBLIC_IP=$(curl -s https://ipinfo.io/ip 2>/dev/null || curl -s https://api.ipify.org 2>/dev/null || echo "localhost")
+    echo "Alternative IP detection result: $PUBLIC_IP"
+fi
+
+# Final fallback to localhost if all methods fail
+if [ -z "$PUBLIC_IP" ] || [ "$PUBLIC_IP" = "" ]; then
+    PUBLIC_IP="localhost"
+    echo "All IP detection methods failed, using localhost"
+fi
+
+echo "Final detected public IP: $PUBLIC_IP"
 
 # Copy nginx configuration
 sudo cp deploy/nginx.conf /etc/nginx/conf.d/bluecoins-web.conf
 
-# Replace placeholder with actual IP (more specific and safer replacement)
-sudo sed -i "s/server_name your-domain.com your-ec2-public-ip;/server_name $PUBLIC_IP;/g" /etc/nginx/conf.d/bluecoins-web.conf
+# Replace placeholder with actual IP/domain (more specific and safer replacement)
+# Handle the case where PUBLIC_IP might be empty or localhost
+if [ "$PUBLIC_IP" = "localhost" ]; then
+    # For localhost, we'll accept any server name
+    sudo sed -i "s/server_name your-domain.com your-ec2-public-ip;/server_name _;/g" /etc/nginx/conf.d/bluecoins-web.conf
+    echo "Nginx configured for localhost/any domain (server_name _)"
+else
+    # Replace with the actual public IP
+    sudo sed -i "s/server_name your-domain.com your-ec2-public-ip;/server_name $PUBLIC_IP;/g" /etc/nginx/conf.d/bluecoins-web.conf
+    echo "Nginx configured for IP: $PUBLIC_IP"
+fi
 
 # Verify the replacement worked correctly and fix common corruption
 if grep -q "server_name $PUBLIC_IP;" /etc/nginx/conf.d/bluecoins-web.conf; then
     echo "Nginx configuration updated successfully with IP: $PUBLIC_IP"
-elif grep -q "server_bluecoins_web $PUBLIC_IP;" /etc/nginx/conf.d/bluecoins-web.conf; then
+elif grep -q "server_name _;" /etc/nginx/conf.d/bluecoins-web.conf; then
+    echo "Nginx configuration updated successfully for any domain"
+elif grep -q "server_bluecoins_web" /etc/nginx/conf.d/bluecoins-web.conf; then
     echo "Detected sed corruption, fixing automatically..."
-    sudo sed -i "s/server_bluecoins_web $PUBLIC_IP;/server_name $PUBLIC_IP;/g" /etc/nginx/conf.d/bluecoins-web.conf
+    if [ "$PUBLIC_IP" = "localhost" ]; then
+        sudo sed -i "s/server_bluecoins_web.*;/server_name _;/g" /etc/nginx/conf.d/bluecoins-web.conf
+    else
+        sudo sed -i "s/server_bluecoins_web.*;/server_name $PUBLIC_IP;/g" /etc/nginx/conf.d/bluecoins-web.conf
+    fi
     echo "Nginx configuration corrected successfully."
 else
     echo "Warning: Automatic IP replacement may have failed. Manual check required."
-    echo "Expected line: server_name $PUBLIC_IP;"
+    if [ "$PUBLIC_IP" = "localhost" ]; then
+        echo "Expected line: server_name _;"
+    else
+        echo "Expected line: server_name $PUBLIC_IP;"
+    fi
     echo "Current config:"
     sudo grep -n "server_name\|server_" /etc/nginx/conf.d/bluecoins-web.conf
 fi

@@ -97,48 +97,58 @@ ssh -i "your-keypair.pem" admin@your-ec2-public-ip
    ```bash
    sudo apt-get update && sudo apt-get upgrade -y
    ```
-2. **Upload `deploy_universal.sh` file using [_FileZilla_](https://filezilla-project.org/download.php):**
+
+2. **Upload `deploy_universal.sh` script:**
+
+- **Upload file `deploy_universal.sh` in `home/admin` directory of your EC2 instance using SCP:**
+
+   ```bash
+   # Upload the deploy script to your EC2 instance
+   scp -i "your-keypair.pem" your-local-path/BluecoinsWeb/deploy/deploy_universal.sh admin@your-ec2-public-ip:/home/admin/
+   ```
 
 <!--
 https://stackoverflow.com/questions/16744863/connect-to-amazon-ec2-file-directory-using-filezilla-and-sftp
 -->
 
-#### _FileZilla Setup_:
-Used a video tutorial for this. Just check:
+-  Using _[FileZilla](https://filezilla-project.org/download.php):_
 
-[Connect to Amazon EC2 file directory using FileZilla and SFTP, Video Tutorial](http://y2u.be/e9BDvg42-JI)
+   Setup using a video tutorial for this. Just check:
 
-Summary of above video tutorial:
+   [Connect to Amazon EC2 file directory using FileZilla and SFTP, Video Tutorial](http://y2u.be/e9BDvg42-JI)
 
-1. Edit (Preferences) > Settings > Connection > SFTP, Click "Add key file”
-2. Browse to the location of your .pem file and select it. 
-3. A message box will appear asking your permission to convert the file into ppk format. Click Yes, then give the file a name and store it somewhere.
-4. If the new file is shown in the list of Keyfiles, then continue to the next step. If not, then click "Add keyfile..." and select the converted file.
-5. File > Site Manager Add a new site with the following parameters:
+   Summary of above video tutorial:
 
-   - **Host**: Your public DNS name of your EC2 instance, or the public IP address of the server.
+   1. Edit (Preferences) > Settings > Connection > SFTP, Click "Add key file”
+   2. Browse to the location of your .pem file and select it. 
+   3. A message box will appear asking your permission to convert the file into ppk format. Click Yes, then give the file a name and store it somewhere.
+   4. If the new file is shown in the list of Keyfiles, then continue to the next step. If not, then click "Add keyfile..." and select the converted file.
+   5. File > Site Manager Add a new site with the following parameters:
 
-   - **Protocol**: SFTP
+      - **Host**: Your public DNS name of your EC2 instance, or the public IP address of the server.
 
-   - **Logon Type**: Normal
+      - **Protocol**: SFTP
 
-   - **User**: From the docs: "For Amazon Linux, the default user name is `ec2-user`. For RHEL5, the user name is often `root` but might be `ec2-user`. For Ubuntu, the user name is `ubuntu`. For SUSE Linux, the user name is `root`. For Debian, the user name is `admin`. Otherwise, check with your AMI provider."
+      - **Logon Type**: Normal
 
-      Press Connect Button - If saving of passwords has been disabled, you will be prompted that the logon type will be changed to 'Ask for password'. Say 'OK' and when connecting, at the password prompt push 'OK' without entering a password to proceed past the dialog.
+      - **User**: From the docs: "For Amazon Linux, the default user name is `ec2-user`. For RHEL5, the user name is often `root` but might be `ec2-user`. For Ubuntu, the user name is `ubuntu`. For SUSE Linux, the user name is `root`. For Debian, the user name is `admin`. Otherwise, check with your AMI provider."
 
-**Note**: FileZilla automatically figures out which key to use. You do not need to specify the key after importing it as described above.
+         Press Connect Button - If saving of passwords has been disabled, you will be prompted that the logon type will be changed to 'Ask for password'. Say 'OK' and when connecting, at the password prompt push 'OK' without entering a password to proceed past the dialog.
 
-#### _Manual `deploy_universal.sh` File Upload_:
+   **Note**: FileZilla automatically figures out which key to use. You do not need to specify the key after importing it as described above.
 
-1. Upload file `deploy_universal.sh` in `home/admin` directory of your EC2 instance using FileZilla or SCP.
 
-2. **Execute the deployment script:**
+
+3. **Execute the deployment script:**
 
    ```bash
    chmod +x /home/admin/deploy_universal.sh
    sudo /home/admin/deploy_universal.sh
    ```
+4. **Test url on your browser:**
+   - Open your browser and go to `http://your-ec2-public-ip` or `http://your-domain.com` if you configured a domain.
 
+   If you see the Bluecoins Web application, congratulations! 🎉
 ---
 
 ## **Steps for manual server setup (Optional):**

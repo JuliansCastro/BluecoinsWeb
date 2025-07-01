@@ -538,3 +538,30 @@ sudo netstat -tlnp | grep :8000
 # Check nginx proxy configuration
 sudo nginx -T | grep -A 10 -B 10 "proxy_pass"
 ```
+
+## Troubleshooting Commands
+
+### Fix nginx configuration issues (if deployment completed but nginx failed)
+
+```bash
+# Quick fix for nginx server_name configuration
+chmod +x /opt/bluecoins-web/deploy/fix_nginx.sh
+/opt/bluecoins-web/deploy/fix_nginx.sh
+```
+
+### Manual nginx configuration fix
+
+```bash
+# Get your public IP
+PUBLIC_IP=$(curl -s https://ipinfo.io/ip)
+echo "Your public IP: $PUBLIC_IP"
+
+# Fix nginx configuration manually
+sudo sed -i "s/server_name.*/server_name $PUBLIC_IP;/" /etc/nginx/conf.d/bluecoins-web.conf
+
+# Test and restart nginx
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+## Original Commands Section
