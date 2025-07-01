@@ -55,7 +55,7 @@ This guide will take you step by step to deploy your Django application on AWS u
                     └─────────────────┘
 ```
 
-## 📝 Deployment Steps
+## 📝 Steps for Automatic Deployment
 
 ### Step 1: Configure AWS S3 (Optional but Recommended)
 
@@ -129,7 +129,7 @@ Summary of above video tutorial:
 
 #### _Manual `deploy_universal.sh` File Upload_:
 
-1. Upload file in `home/admin` directory of your EC2 instance using FileZilla or SCP.
+1. Upload file `deploy_universal.sh` in `home/admin` directory of your EC2 instance using FileZilla or SCP.
 
 2. **Execute the deployment script:**
 
@@ -138,7 +138,9 @@ Summary of above video tutorial:
    sudo /home/admin/deploy_universal.sh
    ```
 
-3. **Configure the server (manual):**
+---
+
+## **Steps for manual server setup (Optional):**
 
 Only if you didn't use the `deploy_universal.sh` script, follow these steps:
    ```bash
@@ -153,11 +155,7 @@ Only if you didn't use the `deploy_universal.sh` script, follow these steps:
 
 3. **Upload your code to the server:**
    ```bash
-
-   # Option 1: Via Git (very recommended)
-   git clone https://github.com/JuliansCastro/BluecoinsWeb.git /opt/bluecoins-web
-
-   # Option 2: Via SCP from your local machine
+   # Via SCP from your local machine
    scp -i "your-keypair.pem" -r . admin@your-public-ip:/opt/bluecoins-web
    ```
 
@@ -187,12 +185,12 @@ Only if you didn't use the `deploy_universal.sh` script, follow these steps:
    DJANGO_DEBUG=false
    DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,your-ec2-public-ip,your-domain.com
    
-   # If using S3
-   USE_S3=true
-   AWS_ACCESS_KEY_ID=your-access-key
-   AWS_SECRET_ACCESS_KEY=your-secret-key
-   AWS_STORAGE_BUCKET_NAME=your-bucket-name
-   AWS_S3_REGION_NAME=us-east-1
+   # Only if using S3, uncomment and configure these:
+   # USE_S3=true
+   # AWS_ACCESS_KEY_ID=your-access-key
+   # AWS_SECRET_ACCESS_KEY=your-secret-key
+   # AWS_STORAGE_BUCKET_NAME=your-bucket-name
+   # AWS_S3_REGION_NAME=us-east-1
    ```
 
 ### Step 6: Configure Systemd and Nginx
@@ -202,21 +200,37 @@ Only if you didn't use the `deploy_universal.sh` script, follow these steps:
    sudo cp deploy/bluecoins-web.service /etc/systemd/system/
    sudo systemctl daemon-reload
    sudo systemctl enable bluecoins-web
+   
+   # Fix permissions for logs directory (important!)
+   sudo chown -R admin:admin /opt/bluecoins-web/logs
+   chmod 755 /opt/bluecoins-web/logs
+   
    sudo systemctl start bluecoins-web
    sudo systemctl status bluecoins-web
    ```
 
+   **Note**: If the service fails with "Unable to configure handler 'file'" error, it's due to logs directory permissions. The fix above resolves this issue.
+
 2. **Configure Nginx:**
    ```bash
+   # Copy nginx configuration
    sudo cp deploy/nginx.conf /etc/nginx/conf.d/bluecoins-web.conf
    
-   # Edit configuration with your domain/IP
+   # Edit configuration with your domain/IP (IMPORTANT!)
    sudo nano /etc/nginx/conf.d/bluecoins-web.conf
+   # Replace 'your-domain.com your-ec2-public-ip' with your actual EC2 public IP
+   # Example: server_name 54.123.45.67;
    
-   # Restart nginx
+   # Test nginx configuration before restarting
+   sudo nginx -t
+   
+   # If test passes, enable and restart nginx
    sudo systemctl enable nginx
    sudo systemctl restart nginx
+   sudo systemctl status nginx
    ```
+
+   **Important**: You must edit the nginx configuration file and replace the placeholder values with your actual EC2 public IP address before restarting nginx.
 
 ### Step 7: Configure Database
 
@@ -329,15 +343,36 @@ python manage.py loaddata backup_file.json
    - Run `python manage.py collectstatic --noinput`
    - Check nginx configuration
 
-3. **Database connection error:**
+3. **Nginx fails to start/restart:**
+   - Test configuration: `sudo nginx -t`
+   - Check logs: `sudo journalctl -xeu nginx.service`
+   - Common issues:
+     - Missing or incorrect server_name in `/etc/nginx/conf.d/bluecoins-web.conf`
+     - Replace `your-domain.com your-ec2-public-ip` with actual values
+     - **Corrupted syntax** (e.g., `server_bluecoins_web` instead of `server_name`):
+       ```bash
+       # Fix corrupted nginx configuration
+       PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+       sudo sed -i "s/server_bluecoins_web $PUBLIC_IP;/server_name $PUBLIC_IP;/" /etc/nginx/conf.d/bluecoins-web.conf
+       ```
+     - Port 80 already in use: `sudo netstat -tlnp | grep :80`
+   - Fix configuration and test: `sudo nginx -t && sudo systemctl restart nginx`
+
+4. **Database connection error:**
    - Check SQLite file permissions
    - Review configuration in settings.py
 
-4. **S3 issues:**
+5. **Gunicorn service fails with "Unable to configure handler 'file'" error:**
+   - This is a permissions issue with the logs directory
+   - Fix with: `sudo chown -R admin:admin /opt/bluecoins-web/logs`
+   - Then restart service: `sudo systemctl restart bluecoins-web`
+   - Check status: `sudo systemctl status bluecoins-web`
+
+6. **S3 issues:**
    - Verify AWS credentials
    - Review bucket policies
 
-5. **Spanish locale not available (Warning message):**
+7. **Spanish locale not available (Warning message):**
    - The application will work fine with default locale, but if you want Spanish month names, install Spanish locale:
    
    ```bash

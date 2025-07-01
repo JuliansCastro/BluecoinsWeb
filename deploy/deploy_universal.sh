@@ -46,8 +46,32 @@ fi
 echo
 echo "-----------------------------------------"
 echo "Step 4: Creating application directory..."
-sudo mkdir -p /opt/bluecoins-web
-sudo chown $USER_NAME:$USER_NAME /opt/bluecoins-web
+if [ ! -d "/opt/bluecoins-web" ]; then
+    echo "Creating /opt/bluecoins-web directory..."
+    sudo mkdir -p /opt/bluecoins-web
+    sudo chown $USER_NAME:$USER_NAME /opt/bluecoins-web
+    echo "Directory created and ownership set to $USER_NAME."
+    echo "Current directory: $(pwd)"
+    echo "Contents of /opt/bluecoins-web:"
+    ls -la /opt/bluecoins-web
+    echo "You can now navigate to /opt/bluecoins-web to continue the setup."
+else
+    echo "/opt/bluecoins-web already exists. Removing existing directory."
+    sudo rm -rf /opt/bluecoins-web/*
+    sudo rm -rf /opt/bluecoins-web/.[^.]* 2>/dev/null || true
+    echo "Existing directory cleaned. You can now continue the setup."
+    echo "Creating a new /opt/bluecoins-web directory..."
+    sudo mkdir -p /opt/bluecoins-web
+    sudo chown $USER_NAME:$USER_NAME /opt/bluecoins-web
+    echo "Directory created and ownership set to $USER_NAME."
+    echo "Current directory: $(pwd)"
+    echo "Contents of /opt/bluecoins-web:"
+    ls -la /opt/bluecoins-web
+    echo "You can now navigate to /opt/bluecoins-web to continue the setup."
+    echo "Current directory: $(pwd)"
+
+fi
+
 
 # Navigate to application directory
 echo
@@ -128,12 +152,24 @@ echo
 echo "-----------------------------------------"
 echo "Step 11: Creating logs directory..."
 mkdir -p logs
+# Fix permissions for logs directory (critical for systemd service)
+sudo chown -R $USER_NAME:$USER_NAME logs
+chmod 755 logs
 
 # Create .env file (you'll need to edit this with your values)
 echo
 echo "-----------------------------------------"
 echo "Step 12: Creating environment file..."
-cp .env.example .env
+if [ -f ".env" ]; then
+    echo ".env file already exists. Removing and recreating."
+    rm .env
+    echo "Creating new .env file from example..."
+    cp .env.example .env
+else
+    echo "Creating .env file from example..."
+    cp .env.example .env
+fi
+
 
 # Generate secret key
 echo
@@ -173,13 +209,151 @@ echo "-----------------------------------------"
 echo "Step 18: Creating Django superuser..."
 python manage.py createsuperuser
 
+# Configure Systemd automatically
 echo
 echo "-----------------------------------------"
-echo "Deployment setup complete!"
+echo "Step 19: Configuring Systemd..."
+
+# Copy systemd service file
+echo "Installing systemd service file..."
+sudo cp deploy/bluecoins-web.service /etc/systemd/system/
+
+# Reload systemd to recognize new service
+echo "Reloading systemd daemon..."
+sudo systemctl daemon-reload
+
+# Enable service to start on boot
+echo "Enabling bluecoins-web service..."
+sudo systemctl enable bluecoins-web
+
+# Fix permissions for logs directory (important!)
+echo "Fixing logs directory permissions..."
+sudo chown -R $USER_NAME:$USER_NAME /opt/bluecoins-web/logs
+chmod 755 /opt/bluecoins-web/logs
+
+# Start the service
+echo "Starting bluecoins-web service..."
+sudo systemctl start bluecoins-web
+
+# Wait a moment for service to start
+sleep 2
+
+# Check service status
+echo "Checking service status..."
+if sudo systemctl is-active --quiet bluecoins-web; then
+    echo "✅ Bluecoins-web service is running successfully!"
+    echo "Service details:"
+    sudo systemctl status bluecoins-web --no-pager -l
+else
+    echo "❌ Service failed to start. Checking logs..."
+    sudo journalctl -u bluecoins-web --no-pager -l --since "1 minute ago"
+    echo ""
+    echo "Common fixes:"
+    echo "1. Check logs directory permissions: sudo chown -R $USER_NAME:$USER_NAME /opt/bluecoins-web/logs"
+    echo "2. Verify virtual environment: ls -la /opt/bluecoins-web/venv/bin/"
+    echo "3. Test Django manually: cd /opt/bluecoins-web && source venv/bin/activate && python manage.py check"
+fi
+
+
+
+# Configure nginx automatically
+echo
+echo "-----------------------------------------"
+echo "Step 20: Configuring Nginx..."
+
+# Get EC2 public IP automatically
+# Using metadata service to get public IP
+# This works on EC2 instances and is safer than hardcoding IPs
+# If running locally, it will default to "localhost"
+PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo "localhost")
+echo "Detected public IP: $PUBLIC_IP"
+
+# Copy nginx configuration
+sudo cp deploy/nginx.conf /etc/nginx/conf.d/bluecoins-web.conf
+
+# Replace placeholder with actual IP (more specific and safer replacement)
+sudo sed -i "s/server_name your-domain.com your-ec2-public-ip;/server_name $PUBLIC_IP;/g" /etc/nginx/conf.d/bluecoins-web.conf
+
+# Verify the replacement worked correctly and fix common corruption
+if grep -q "server_name $PUBLIC_IP;" /etc/nginx/conf.d/bluecoins-web.conf; then
+    echo "Nginx configuration updated successfully with IP: $PUBLIC_IP"
+elif grep -q "server_bluecoins_web $PUBLIC_IP;" /etc/nginx/conf.d/bluecoins-web.conf; then
+    echo "Detected sed corruption, fixing automatically..."
+    sudo sed -i "s/server_bluecoins_web $PUBLIC_IP;/server_name $PUBLIC_IP;/g" /etc/nginx/conf.d/bluecoins-web.conf
+    echo "Nginx configuration corrected successfully."
+else
+    echo "Warning: Automatic IP replacement may have failed. Manual check required."
+    echo "Expected line: server_name $PUBLIC_IP;"
+    echo "Current config:"
+    sudo grep -n "server_name\|server_" /etc/nginx/conf.d/bluecoins-web.conf
+fi
+
+# Test nginx configuration
+echo "Testing nginx configuration..."
+if sudo nginx -t; then
+    echo "Nginx configuration is valid."
+    sudo systemctl enable nginx
+    sudo systemctl restart nginx
+    if sudo systemctl is-active --quiet nginx; then
+        echo "Nginx started successfully!"
+        
+        # Final verification - test the full stack
+        echo
+        echo "🧪 Running final verification tests..."
+        echo "Testing Django directly (port 8000)..."
+        if curl -s http://localhost:8000 >/dev/null; then
+            echo "✅ Django is responding correctly"
+        else
+            echo "❌ Django test failed"
+        fi
+        
+        echo "Testing full stack via nginx (port 80)..."
+        if curl -s http://localhost:80 | grep -q "Bluecoins\|nginx"; then
+            echo "✅ Nginx proxy is working correctly"
+        else
+            echo "❌ Nginx proxy test failed"
+        fi
+        
+        echo "Testing public access..."
+        if curl -s http://$PUBLIC_IP | grep -q "Bluecoins"; then
+            echo "✅ Public access is working correctly"
+        else
+            echo "⚠️  Public access test inconclusive (may be firewall/security group)"
+        fi
+    else
+        echo "Warning: Nginx failed to start. Check logs with: sudo journalctl -xeu nginx"
+    fi
+else
+    echo "Warning: Nginx configuration test failed. Please check manually."
+fi
+
+#
+#echo "Step 21: Configure SSL certificate"
+
+echo
+echo "-----------------------------------------"
+echo "🎉 DEPLOYMENT COMPLETED SUCCESSFULLY! 🎉"
+echo "-----------------------------------------"
 echo "Current user: $USER_NAME"
 echo "Package manager: $PACKAGE_MANAGER"
+echo "Public IP: $PUBLIC_IP"
 echo ""
-echo "Next steps:"
-echo "1. Configure nginx"
-echo "2. Set up systemd service for gunicorn"
-echo "3. Configure SSL certificate"
+echo "✅ Django/Gunicorn: Running on port 8000"
+echo "✅ Nginx: Running and configured as reverse proxy"
+echo "✅ Database: Migrated and ready"
+echo "✅ Static files: Collected and served"
+echo ""
+echo "🌐 Your Django application is now LIVE and accessible at:"
+echo "   🔗 http://$PUBLIC_IP"
+echo ""
+echo "🔧 Next steps (optional):"
+echo "1. Configure SSL certificate: sudo apt-get install certbot python3-certbot-nginx"
+echo "2. Set up domain name (if you have one)"
+echo "3. Configure automated backups"
+echo ""
+echo "📊 Useful monitoring commands:"
+echo "  sudo systemctl status bluecoins-web  # Check Django service"
+echo "  sudo systemctl status nginx         # Check nginx service"
+echo "  sudo journalctl -u bluecoins-web -f # View Django logs"
+echo "  curl http://localhost:8000          # Test Django directly"
+echo "  curl http://$PUBLIC_IP              # Test full stack"

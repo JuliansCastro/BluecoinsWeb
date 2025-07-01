@@ -14,7 +14,12 @@ Your Django application has been prepared for deployment on AWS with the followi
     - Logging configured
 
 2. 📦 `requirements.txt`:
-    - Added production dependencies (gunicorn, whitenoise, boto3, django-storages)
+    - Added production dependencies (gunicorn, whitenoise, boto3, django-stor# Fix nginx configuration with correct IP
+PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+sudo sed -i "s/server_name your-domain.com your-ec2-public-ip;/server_name $PUBLIC_IP;/g" /etc/nginx/conf.d/bluecoins-web.conf
+
+# Fix common sed corruption (server_bluecoins_web issue)
+sudo sed -i "s/server_bluecoins_web $PUBLIC_IP;/server_name $PUBLIC_IP;/g" /etc/nginx/conf.d/bluecoins-web.confs)
 
 3. 📄 `.env.example`:
     - Environment variables for AWS and production
@@ -403,4 +408,133 @@ env | grep AWS
 # 6. Test S3 connectivity (if using S3)
 ```bash
 python -c "import boto3; print(boto3.client('s3').list_buckets())"
+```
+
+<br><br><br>
+
+---
+# SYSTEMD SERVICE COMMANDS (Production monitoring)
+---
+
+# 1. Service status and management
+```bash
+# Check service status
+sudo systemctl status bluecoins-web
+
+# Start/stop/restart service
+sudo systemctl start bluecoins-web
+sudo systemctl stop bluecoins-web
+sudo systemctl restart bluecoins-web
+
+# Enable/disable service (auto-start on boot)
+sudo systemctl enable bluecoins-web
+sudo systemctl disable bluecoins-web
+```
+
+# 2. View service logs
+```bash
+# View recent logs
+sudo journalctl -u bluecoins-web -f
+
+# View logs from today
+sudo journalctl -u bluecoins-web --since today
+
+# View last 50 log entries
+sudo journalctl -u bluecoins-web -n 50 --no-pager
+
+# View logs with timestamps
+sudo journalctl -u bluecoins-web --since "2025-07-01 10:00:00"
+```
+
+# 3. Fix common service issues
+```bash
+# Fix logs directory permissions (most common issue)
+sudo chown -R admin:admin /opt/bluecoins-web/logs
+chmod 755 /opt/bluecoins-web/logs
+
+# Reload systemd after service file changes
+sudo systemctl daemon-reload
+
+# Check service configuration
+sudo systemctl cat bluecoins-web
+
+# Check if service is enabled
+sudo systemctl is-enabled bluecoins-web
+```
+
+# 4. Monitor system resources
+```bash
+# Check memory and CPU usage
+ps aux | grep gunicorn
+
+# Check listening ports
+sudo netstat -tlnp | grep :8000
+
+# Check if application is responding
+curl http://localhost:8000
+
+# Check system load
+top -p $(pgrep -f gunicorn | tr '\n' ',' | sed 's/,$//')
+```
+
+<br><br><br>
+
+---
+# NGINX TROUBLESHOOTING COMMANDS
+---
+
+# 1. Nginx configuration and testing
+```bash
+# Test nginx configuration syntax
+sudo nginx -t
+
+# Reload nginx configuration
+sudo nginx -s reload
+
+# Check nginx status
+sudo systemctl status nginx
+
+# Restart nginx
+sudo systemctl restart nginx
+
+# View nginx error logs
+sudo tail -f /var/log/nginx/error.log
+
+# View nginx access logs
+sudo tail -f /var/log/nginx/access.log
+```
+
+# 2. Fix common nginx issues
+```bash
+# Check if port 80 is already in use
+sudo netstat -tlnp | grep :80
+
+# Check nginx configuration files
+ls -la /etc/nginx/conf.d/
+cat /etc/nginx/conf.d/bluecoins-web.conf
+
+# Fix nginx configuration with correct IP
+PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+sudo sed -i "s/your-domain.com your-ec2-public-ip/$PUBLIC_IP/g" /etc/nginx/conf.d/bluecoins-web.conf
+
+# Remove default nginx site (if conflicting)
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Test and restart nginx
+sudo nginx -t && sudo systemctl restart nginx
+```
+
+# 3. Debug nginx proxy issues
+```bash
+# Test direct connection to Django (bypassing nginx)
+curl http://localhost:8000
+
+# Test nginx proxy
+curl http://localhost:80
+
+# Check if gunicorn is listening on port 8000
+sudo netstat -tlnp | grep :8000
+
+# Check nginx proxy configuration
+sudo nginx -T | grep -A 10 -B 10 "proxy_pass"
 ```
