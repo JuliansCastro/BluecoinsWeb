@@ -21,11 +21,33 @@ import calendar
 from .models import Accounts_table, Transactions_table, Child_category_table, Labels_table
 
 
-# Set the local language for month names to Spanish
-try:
-    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # For Linux/Mac
-except locale.Error:
-    locale.setlocale(locale.LC_TIME, 'Spanish_Spain.1252')  # For Windows
+# Set the local language for month names to Spanish (with fallback)
+def set_spanish_locale():
+    """
+    Try to set Spanish locale for month names, fallback to default if not available.
+    """
+    spanish_locales = [
+        'es_ES.UTF-8',      # Linux/Mac
+        'es_ES',            # Linux/Mac alternative
+        'Spanish_Spain.1252', # Windows
+        'Spanish',          # Windows alternative
+        'esp',              # Some systems
+    ]
+    
+    for locale_name in spanish_locales:
+        try:
+            locale.setlocale(locale.LC_TIME, locale_name)
+            print(f"Successfully set locale to: {locale_name}")
+            return locale_name
+        except locale.Error:
+            continue
+    
+    # If no Spanish locale is available, keep the default
+    print("Warning: No Spanish locale available, using system default")
+    return None
+
+# Attempt to set Spanish locale
+set_spanish_locale()
 
 
 class TransactionsListView(ListView):

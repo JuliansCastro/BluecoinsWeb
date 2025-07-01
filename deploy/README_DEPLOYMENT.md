@@ -337,4 +337,20 @@ python manage.py loaddata backup_file.json
    - Verify AWS credentials
    - Review bucket policies
 
+5. **Spanish locale not available (Warning message):**
+   - The application will work fine with default locale, but if you want Spanish month names, install Spanish locale:
+   
+   ```bash
+   # Install Spanish locale on Debian/Ubuntu
+   sudo apt-get install locales
+   sudo locale-gen es_ES.UTF-8
+   sudo update-locale
+   
+   # Or alternatively, install language pack
+   sudo apt-get install language-pack-es
+   
+   # Restart the application after locale installation
+   sudo systemctl restart bluecoins-web
+   ```
+
 
