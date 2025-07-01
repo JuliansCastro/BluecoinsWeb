@@ -1,0 +1,31 @@
+name: 🚀 Auto Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🚀 Deploy to AWS EC2
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.AWS_HOST }}
+        username: ${{ secrets.AWS_USERNAME }}
+        key: ${{ secrets.AWS_SSH_KEY }}
+        timeout: 300s
+        script: |
+          echo "🔄 Starting deployment..."
+          cd /opt/bluecoins-web
+          
+          # Make update script executable
+          chmod +x deploy/update.sh
+          
+          # Run the update script
+          ./deploy/update.sh
+          
+          echo "✅ Deployment completed successfully!"
+          echo "🌐 App is running at: http://${{ secrets.AWS_HOST }}"
