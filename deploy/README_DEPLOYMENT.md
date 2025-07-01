@@ -134,9 +134,8 @@ Summary of above video tutorial:
 2. **Execute the deployment script:**
 
    ```bash
-   admin@your-public-ip: cd /home/admin
-   chmod +x deploy_universal.sh
-   sudo ./deploy_universal.sh
+   chmod +x /home/admin/deploy_universal.sh
+   sudo /home/admin/deploy_universal.sh
    ```
 
 3. **Configure the server (manual):**

@@ -39,6 +39,7 @@ sudo mkdir -p /opt/bluecoins-web
 sudo chown $USER_NAME:$USER_NAME /opt/bluecoins-web
 
 # Navigate to application directory
+echo "Navigating to application directory..."
 cd /opt/bluecoins-web
 
 # Clone repository (replace with your repository URL)
