@@ -394,7 +394,22 @@ python manage.py loaddata backup_file.json
    - Then restart service: `sudo systemctl restart bluecoins-web`
    - Check status: `sudo systemctl status bluecoins-web`
 
-6. **S3 issues:**
+6. **500 Error in Django Admin after login:**
+   - **Cause**: Database permissions issue - SQLite database is read-only
+   - **Error**: `sqlite3.OperationalError: attempt to write a readonly database`
+   - **Quick fix**:
+     ```bash
+     # Get database path and fix permissions
+     cd /opt/bluecoins-web
+     DB_PATH=$(python manage.py shell -c "from django.conf import settings; print(settings.DATABASES['default']['NAME'])")
+     sudo chown admin:admin "$DB_PATH"
+     sudo chmod 664 "$DB_PATH"
+     sudo chown admin:admin "$(dirname "$DB_PATH")"
+     sudo systemctl restart bluecoins-web
+     ```
+   - **Automated fix**: Use the repair script: `cd /opt/bluecoins-web && ./deploy/fix_database_permissions.sh`
+
+7. **S3 issues:**
    - Verify AWS credentials
    - Review bucket policies
 
